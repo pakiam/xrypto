@@ -20,6 +20,7 @@
 </script>
 
 <style lang="scss">
+  @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons');
   @import '../node_modules/vuetify/dist/vuetify.min.css';
 
   * {

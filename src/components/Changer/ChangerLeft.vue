@@ -1,9 +1,8 @@
 <template>
   <v-list two-line>
+    <v-subheader>{{header}}</v-subheader>
     <template v-for="item in items">
-      <v-subheader v-if="item.header" v-text="item.header"></v-subheader>
-      <v-divider v-else-if="item.divider" v-bind:inset="item.inset"></v-divider>
-      <v-list-tile avatar v-else v-bind:key="item.title" @click="itemEmit(item)" :value="item.selected">
+      <v-list-tile avatar v-bind:key="item.title" @click="itemEmit(item)" :value="item.selected">
         <!-- list item image -->
         <v-list-tile-avatar>
           <img v-bind:src="item.avatar">
@@ -12,7 +11,7 @@
 
         <!-- list item content -->
         <v-list-tile-content>
-          <v-list-tile-title>{{ item.title }} {{ item.abbr }}</v-list-tile-title>
+          <v-list-tile-title>{{ item.title }} {{ item.code }}</v-list-tile-title>
         </v-list-tile-content>
         <!-- list item content -->
 
@@ -33,6 +32,9 @@
     props: {
       items: {
         type: Array
+      },
+      header: {
+        type: String
       }
     },
     data () {
