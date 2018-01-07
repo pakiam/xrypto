@@ -12,6 +12,9 @@
 <script>
   import changerLeft from './ChangerLeft'
   import changerRight from './changerRight'
+  const ROUND_PRICE = 8
+  const RUB_PRICE_MULTIPLIER = 100
+  const PRICE_MULTIPLIER = 1
 
   export default {
     name: 'changer',
@@ -23,19 +26,31 @@
             image: '',
             title: 'Сбербанк',
             abbr: 'RUB',
-            active: true
+            per: 100,
+            selected: true,
+            currencyRate: 1,
+            disabled: false,
+            disableCurrencies: []
           },
           {
             image: '',
             title: 'Тинькофф',
             abbr: 'RUB',
-            active: false
+            per: 100,
+            selected: false,
+            currencyRate: 1,
+            disabled: false,
+            disableCurrencies: []
           },
           {
             image: '',
-            title: 'ADV Cash USD',
+            title: 'ADV Cash',
             abbr: 'USD',
-            active: false
+            per: 1,
+            selected: false,
+            currencyRate: 1,
+            disabled: false,
+            disableCurrencies: []
           }
         ],
         itemsReceive: [
@@ -50,7 +65,8 @@
             title: 'Bitcoin',
             abbr: 'BTC'
           }
-        ]
+        ],
+        selectedItem: {}
       }
     },
     components: {
@@ -64,7 +80,7 @@
        */
       itemGiveSelected (item) {
         this.itemsGive.filter(i => {
-          i === item ? i.active = true : i.active = false
+          i === item ? i.selected = true : i.selected = false
         })
         this.getPrices(item.abbr)
       },
@@ -73,6 +89,9 @@
        * @param value
        */
       getPrices (value) {
+        /**
+         * Create new array with abbr of receiving currencies to paste it in GET URL
+         */
         const currencies = this.itemsReceive.map(item => {
           if (item.hasOwnProperty('abbr')) {
             return item.abbr
@@ -82,23 +101,39 @@
 
         this.$http.get(url).then(response => {
           const data = response.data
-          console.log('data', response.data)
+          // console.log('data', response.data)
+          /**
+           * Add new property 'price' for every itemsReceive to show it on page
+           * based on data
+           */
           for (let i = 0; i < this.itemsReceive.length; i++) {
             if (this.itemsReceive[i].hasOwnProperty('abbr')) {
-              this.$set(this.itemsReceive[i], 'price', data[this.itemsReceive[i].abbr] * 100)
+              let price = data[this.itemsReceive[i].abbr] * this.priceMultiplier()
+              let roundedPrice = price.toFixed(ROUND_PRICE)
+              this.$set(this.itemsReceive[i], 'price', roundedPrice)
             }
           }
         }, response => {
           // error callback
         })
+      },
+      /**
+       * Returns correct multiplier, based on given currency
+       * this made cuz 1 RUB to BTC is a very small number
+       * @param value
+       * @returns {number}
+       */
+      priceMultiplier (value) {
+        return value === 'RUB' ? RUB_PRICE_MULTIPLIER : PRICE_MULTIPLIER
       }
     },
     created () {
       /**
-       * Initial getPrices call, then selected default first item of itemsGive
+       * Initial getPrices call, when selected default first item of itemsGive
        */
       this.itemsGive.map(item => {
-        if (item.hasOwnProperty('active') && item.active) {
+        if (item.hasOwnProperty('selected') && item.selected) {
+          this.selectedItem = item
           return this.getPrices(item.abbr)
         }
       })
